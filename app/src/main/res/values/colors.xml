@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#FE9798</color>
+    <color name="secondary">#FEAE97</color>
+    <color name="surface_light">#F6E8DF</color>
+    <color name="surface_dark">#3E3C6E</color>
+    
+    <!-- Additional colors for system bars and text -->
+    <color name="primary_variant">#E88687</color>
+    <color name="secondary_variant">#E99D86</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="on_secondary">#FFFFFF</color>
+    <color name="on_surface_light">#000000</color>
+    <color name="on_surface_dark">#FFFFFF</color>
+</resources>
