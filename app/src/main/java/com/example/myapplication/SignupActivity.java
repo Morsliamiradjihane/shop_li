@@ -10,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.example.myapplication.data.DatabaseHelper;
+import com.example.myapplication.data.model.User;
 
 public class SignupActivity extends AppCompatActivity {
     private TextInputLayout nameLayout;
@@ -22,11 +24,15 @@ public class SignupActivity extends AppCompatActivity {
     private TextInputEditText confirmPasswordEditText;
     private MaterialButton signupButton;
     private MaterialButton loginButton;
+    private DatabaseHelper databaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+
+        // Initialize database helper
+        databaseHelper = new DatabaseHelper(this);
 
         // Initialize views
         nameLayout = findViewById(R.id.nameLayout);
@@ -76,6 +82,9 @@ public class SignupActivity extends AppCompatActivity {
         } else if (!isEmailValid(email)) {
             emailLayout.setError("Invalid email address");
             cancel = true;
+        } else if (databaseHelper.isEmailExists(email)) {
+            emailLayout.setError("Email already registered");
+            cancel = true;
         }
 
         if (TextUtils.isEmpty(password)) {
@@ -95,17 +104,31 @@ public class SignupActivity extends AppCompatActivity {
         }
 
         if (!cancel) {
-            // TODO: Implement actual signup logic here
-            // For now, just show a success message
-            Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show();
-            // Navigate to login screen
-            Intent intent = new Intent(SignupActivity.this, LoginActivity.class);
-            startActivity(intent);
-            finish();
+            // Create new user
+            User newUser = new User(name, email, password);
+            long userId = databaseHelper.addUser(newUser);
+
+            if (userId != -1) {
+                Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show();
+                // Navigate to login screen
+                Intent intent = new Intent(SignupActivity.this, LoginActivity.class);
+                startActivity(intent);
+                finish();
+            } else {
+                Toast.makeText(this, "Registration failed", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
     private boolean isEmailValid(String email) {
         return email.contains("@") && email.contains(".");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (databaseHelper != null) {
+            databaseHelper.close();
+        }
     }
 }

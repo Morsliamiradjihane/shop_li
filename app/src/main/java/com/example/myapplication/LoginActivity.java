@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.example.myapplication.data.DatabaseHelper;
 
 public class LoginActivity extends AppCompatActivity {
     private TextInputLayout emailLayout;
@@ -18,11 +19,15 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputEditText passwordEditText;
     private MaterialButton loginButton;
     private MaterialButton signupButton;
+    private DatabaseHelper databaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        // Initialize database helper
+        databaseHelper = new DatabaseHelper(this);
 
         // Initialize views
         emailLayout = findViewById(R.id.emailLayout);
@@ -38,6 +43,9 @@ public class LoginActivity extends AppCompatActivity {
             Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
             startActivity(intent);
         });
+
+        // For testing: Display dummy user credentials
+        Toast.makeText(this, "Test User: john@example.com / password123", Toast.LENGTH_LONG).show();
     }
 
     private void attemptLogin() {
@@ -66,13 +74,28 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         if (!cancel) {
-            // TODO: Implement actual login logic here
-            // For now, just show a success message
-            Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show();
+            // Validate user credentials against database
+            if (databaseHelper.validateUser(email, password)) {
+                Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show();
+                // Navigate to Home activity
+                Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                startActivity(intent);
+                finish(); // Close login activity
+            } else {
+                Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
     private boolean isEmailValid(String email) {
         return email.contains("@") && email.contains(".");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (databaseHelper != null) {
+            databaseHelper.close();
+        }
     }
 }
